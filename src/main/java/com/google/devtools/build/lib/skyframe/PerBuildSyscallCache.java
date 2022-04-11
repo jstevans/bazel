@@ -258,7 +258,16 @@ public final class PerBuildSyscallCache implements SyscallCache {
     try {
       // TODO(bazel-team): Consider storing the Collection of Dirent values more compactly by
       // reusing DirectoryEntryListingStateValue#CompactSortedDirents.
-      return p.readdir(Symlinks.NOFOLLOW);
+      Collection<Dirent> dirents = p.readdir(Symlinks.NOFOLLOW);
+      Dirent remove = null;
+      for (Dirent d : dirents) {
+        if (d.getName().equals("node_modules")) {
+          remove = d;
+          break;
+        }
+      }
+      dirents.remove(remove);
+      return dirents;
     } catch (IOException e) {
       return e;
     }
